@@ -1,5 +1,5 @@
 import 'package:budget_tracker/models/transaction_item.dart';
-import 'package:budget_tracker/services/budget_service.dart';
+import 'package:budget_tracker/view_models/BudgetViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
                 itemtoAdd: (transactionItem) {
                   final budgetService =
                       Provider.of<BudgetService>(context, listen: false);
-                  budgetService.addItems(transactionItem);
+                  budgetService.addItem(transactionItem);
                   // setState(() {
                   //   items.add(transactionItem);
                   // });
@@ -43,16 +43,25 @@ class HomePage extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   child: Consumer<BudgetService>(
                     builder: (context, value, child) {
+                      final balance = value.getBalance();
+                      final budget = value.getBudget();
+                      double percentage = balance / budget;
+                      if (percentage < 0) {
+                        percentage = 0;
+                      }
+                      if (percentage > 1) {
+                        percentage = 1;
+                      }
                       return CircularPercentIndicator(
                         radius: screenSize.width / 2,
                         lineWidth: 10,
-                        percent: value.balance / value.budget,
+                        percent: percentage,
                         backgroundColor: Colors.white,
                         center: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "\$" + value.balance.toString().split(".")[0],
+                              "\$" + balance.toString().split(".")[0],
                               style: const TextStyle(
                                   fontSize: 48, fontWeight: FontWeight.bold),
                             ),
@@ -61,7 +70,7 @@ class HomePage extends StatelessWidget {
                               style: TextStyle(fontSize: 18),
                             ),
                             Text(
-                              "Budget: \$" + value.budget.toString(),
+                              "Budget: \$" + budget.toString(),
                               style: const TextStyle(fontSize: 10),
                             ),
                           ],
@@ -105,33 +114,69 @@ class TxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.background,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(.05),
-                offset: const Offset(0, 25),
-                blurRadius: 50),
-          ],
-        ),
-        padding: const EdgeInsets.all(15),
-        width: MediaQuery.of(context).size.width,
-        child: Row(
-          children: [
-            Text(
-              txItem.name,
-              style: const TextStyle(fontSize: 18),
-            ),
-            const Spacer(),
-            Text(
-              (!txItem.isExpense ? "+" : "-") + "\$" + txItem.amount.toString(),
-              style: const TextStyle(fontSize: 16),
-            )
-          ],
+    return GestureDetector(
+      onTap: () => showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Row(
+                  children: [
+                    const Text("Delete Item"),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        final budgetViewModel = Provider.of<BudgetService>(
+                          context,
+                          listen: false,
+                        );
+                        budgetViewModel.deleteItem(txItem);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Yes"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("No"),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(.05),
+                  offset: const Offset(0, 25),
+                  blurRadius: 50),
+            ],
+          ),
+          padding: const EdgeInsets.all(15),
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            children: [
+              Text(
+                txItem.name,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const Spacer(),
+              Text(
+                (!txItem.isExpense ? "+" : "-") +
+                    "\$" +
+                    txItem.amount.toString(),
+                style: const TextStyle(fontSize: 16),
+              )
+            ],
+          ),
         ),
       ),
     );

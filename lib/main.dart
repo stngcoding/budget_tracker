@@ -1,5 +1,6 @@
 import 'package:budget_tracker/screens/home.dart';
-import 'package:budget_tracker/services/budget_service.dart';
+import 'package:budget_tracker/view_models/BudgetViewModel.dart';
+import 'package:budget_tracker/services/local_storage_service.dart';
 import 'package:budget_tracker/services/theme_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final localStorageService = LocalStorageService();
+  await localStorageService.initializeHive();
   final sharedPreferences = await SharedPreferences.getInstance();
   return runApp(
     MyApp(

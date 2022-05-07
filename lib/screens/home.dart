@@ -1,6 +1,6 @@
 import 'package:budget_tracker/pages/home_page.dart';
 import 'package:budget_tracker/pages/profile_page.dart';
-import 'package:budget_tracker/services/budget_service.dart';
+import 'package:budget_tracker/view_models/BudgetViewModel.dart';
 import 'package:budget_tracker/services/theme_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
